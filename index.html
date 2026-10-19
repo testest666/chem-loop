@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>化学错题闭环 · 人教版高二</title>
+<style>
+:root{--bg:#F6F5F1;--card:#FFFFFF;--ink:#2C2C2A;--sub:#5F5E5A;--line:#D3D1C7;--p:#534AB7;--pl:#EEEDFE;--g:#0F6E56;--gl:#E1F5EE;--r:#A32D2D;--rl:#FCEBEB;--a:#854F0B;--al:#FAEEDA}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Microsoft YaHei","PingFang SC",sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px;position:sticky;top:0;z-index:10}
+.h-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;max-width:960px;margin:0 auto}
+h1{font-size:16px;font-weight:500;flex:1;min-width:180px}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:6px 14px;font-size:13px;cursor:pointer;color:var(--sub)}
+.seg button.on{background:var(--pl);color:var(--p);font-weight:500}
+nav{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:53px;z-index:9}
+.tabs{display:flex;gap:4px;max-width:960px;margin:0 auto;padding:6px 12px;flex-wrap:wrap}
+.tabs button{border:0;background:transparent;padding:6px 12px;border-radius:8px;font-size:13px;cursor:pointer;color:var(--sub)}
+.tabs button.on{background:var(--pl);color:var(--p);font-weight:500}
+main{max-width:960px;margin:0 auto;padding:16px 12px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+h2{font-size:15px;font-weight:500;margin-bottom:10px}
+h3{font-size:13px;font-weight:500;margin:12px 0 6px}
+.hint{color:var(--sub);font-size:12px;margin:4px 0 10px}
+label{display:block;font-size:12px;color:var(--sub);margin:10px 0 4px}
+textarea,input[type=text],input[type=number],select{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit;background:#fff}
+textarea{min-height:72px;resize:vertical}
+.btn{display:inline-block;border:0;border-radius:8px;padding:9px 16px;font-size:14px;cursor:pointer;background:var(--pl);color:var(--p);font-weight:500;margin:4px 4px 4px 0}
+.btn.pri{background:var(--p);color:#fff}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink);font-weight:400}
+.btn.warn{background:var(--rl);color:var(--r)}
+.btn.sm{padding:5px 10px;font-size:12px;margin:2px 2px 2px 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{border:1px solid var(--line);border-radius:16px;padding:5px 12px;font-size:12px;cursor:pointer;background:#fff;color:var(--sub)}
+.chip.on{background:var(--pl);border-color:var(--p);color:var(--p);font-weight:500}
+.chip.on.g{background:var(--gl);border-color:var(--g);color:var(--g)}
+.badge{display:inline-block;border-radius:6px;padding:1px 8px;font-size:11px;margin-left:6px}
+.b-p{background:var(--pl);color:var(--p)}
+.b-g{background:var(--gl);color:var(--g)}
+.b-r{background:var(--rl);color:var(--r)}
+.b-a{background:var(--al);color:var(--a)}
+.item{border:1px solid var(--line);border-radius:10px;padding:12px;margin:8px 0;background:#fff}
+.item .meta{font-size:12px;color:var(--sub);margin-bottom:6px}
+.item img{max-width:100%;border-radius:8px;border:1px solid var(--line);margin:6px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>div{flex:1;min-width:140px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;background:#fff}
+.stat .n{font-size:22px;font-weight:500}
+.stat .l{font-size:12px;color:var(--sub)}
+.alert{border-radius:10px;padding:10px 12px;margin:8px 0;font-size:13px}
+.alert.red{background:var(--rl);color:var(--r)}
+.alert.a{background:var(--al);color:var(--a)}
+.alert.g{background:var(--gl);color:var(--g)}
+table{width:100%;border-collapse:collapse;font-size:12px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+th{background:var(--bg);font-weight:500}
+.sentence{background:var(--pl);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:13px}
+.ok{color:var(--g);font-weight:500}
+.no{color:var(--r);font-weight:500}
+#printArea{display:none}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99;max-width:86vw;text-align:center}
+.toast.show{opacity:1}
+footer{max-width:960px;margin:0 auto;padding:12px;color:var(--sub);font-size:11px}
+@media print{
+ header,nav,main,footer,.toast{display:none!important}
+ #printArea{display:block!important}
+ .pcard{page-break-after:always;border:1px solid #999;border-radius:8px;padding:14px;margin-bottom:10px}
+ .pcard .side{font-size:12px;color:#555;border-bottom:1px solid #ccc;padding-bottom:6px;margin-bottom:8px}
+ .pcard img{max-width:100%;max-height:300px;border:1px solid #ccc}
+ .pcard .red{border:1.5px solid #A32D2D;border-radius:6px;padding:8px;margin:8px 0;color:#A32D2D}
+ .pcard .back{margin-top:10px;border-top:1px dashed #999;padding-top:8px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="h-row">
+    <h1>化学错题闭环 · 人教版高二</h1>
+    <div class="seg">
+      <button id="vStu" class="on" onclick="setView('student')">学生</button>
+      <button id="vPar" onclick="setView('parent')">家长</button>
+    </div>
+    <button class="btn sm ghost" onclick="exportJSON()">导出备份</button>
+    <button class="btn sm ghost" onclick="document.getElementById('importFile').click()">导入</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this.files[0])">
+  </div>
+</header>
+<nav><div class="tabs" id="tabs"></div></nav>
+<main id="app"></main>
+<footer>数据存在本机浏览器（IndexedDB），清缓存/换设备前请先导出 JSON 备份。MVP 的"AI 预填"为本地卡点建议库；看图识别错解需接入联网 AI，属升级项。</footer>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+var TAGS=[
+ {g:"选必1 化学反应原理",items:["化学反应的热效应","化学反应速率","化学平衡","电离平衡","水解平衡","沉淀溶解平衡","原电池","电解池","金属的腐蚀与防护"]},
+ {g:"选必2 物质结构与性质",items:["原子结构与性质","分子结构与性质","共价键与分子空间结构","晶体结构与性质","配合物"]},
+ {g:"选必3 有机化学基础",items:["有机物的结构与研究方法","烃","卤代烃","醇酚","醛羧酸酯","有机合成","生物大分子"]},
+ {g:"跨主题专项",items:["Nₐ判断","氧化还原与配平","离子共存","离子方程式","实验综合","同分异构体"]}
+];
+var STAGES=["看不出","想不到","推不动","写不好"];
+var SUGGEST={
+ "看不出":["漏看了题目条件（如标况/过量/溶液酸碱性）","没看出图像或表格的趋势、拐点、极值","没识别出题型模型，读完不知道在考什么","把离子方程式误当化学方程式要求"],
+ "想不到":["没想到用守恒（电荷/电子/原子守恒）","没想到把条件翻译成化学语言（如'恰好沉淀'=计量关系）","没想起来这个情境对应的规律或模型","没想到从终态/差量倒推"],
+ "推不动":["配平或计算失误","单位换算/有效数字出错","推理中途跳步导致混乱","公式记错或代错数据"],
+ "写不好":["漏写必要步骤或依据","漏讨论过量/少量、过量产物等情形","术语/化学用语不规范","单位或有效数字不合要求"]
+};
+var INTERVALS=[1,2,4,7,15,30];
+var state={view:"student",tab:"collect",cur:null,tagSel:[],recent:[],prefillSnap:null,draftPhotos:[]};
+
+function $(s){return document.querySelector(s)}
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function addDays(n){var d=new Date();d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/86400000)}
+function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},2200)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+var DB={
+ open:function(){return new Promise(function(res,rej){var r=indexedDB.open("chem-loop",1);
+  r.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains("mistakes"))db.createObjectStore("mistakes",{keyPath:"id"})};
+  r.onsuccess=function(e){res(e.target.result)};r.onerror=function(e){rej(e)};})},
+ put:function(o){return DB.open().then(function(db){return new Promise(function(res){var tx=db.transaction("mistakes","readwrite");tx.objectStore("mistakes").put(o);tx.oncomplete=function(){res()}})})},
+ del:function(id){return DB.open().then(function(db){return new Promise(function(res){var tx=db.transaction("mistakes","readwrite");tx.objectStore("mistakes").delete(id);tx.oncomplete=function(){res()}})})},
+ all:function(){return DB.open().then(function(db){return new Promise(function(res){var tx=db.transaction("mistakes","readonly");var req=tx.objectStore("mistakes").getAll();req.onsuccess=function(){res(req.result||[])};req.onerror=function(){res([])}})})}
+};
+var M=[];
+function save(m){var i=-1;for(var k=0;k<M.length;k++)if(M[k].id===m.id)i=k;if(i>=0)M[i]=m;else M.unshift(m);return DB.put(m)}
+
+function readImage(file){return new Promise(function(res){var fr=new FileReader();fr.onload=function(){var img=new Image();img.onload=function(){var max=1280,w=img.width,h=img.height;if(w>max){h=h*max/w;w=max}var c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);res(c.toDataURL("image/jpeg",0.72))};img.src=fr.result};fr.readAsDataURL(file)})}
+function pending(){return M.filter(function(m){return m.status==="collected"})}
+function attributed(){return M.filter(function(m){return m.status==="attributed"})}
+function dueToday(){return attributed().filter(function(m){return m.review&&m.review.next&&m.review.next<=today()})}
+
+function setView(v){state.view=v;state.tab=v==="student"?"collect":"board";render()}
+function setTab(t){state.tab=t;render()}
+
+function render(){
+ $("#vStu").className=state.view==="student"?"on":"";
+ $("#vPar").className=state.view==="parent"?"on":"";
+ var tabs=state.view==="student"
+  ?[["collect","收集(30秒)"],["attr","归因(10分钟)"],["practice","变式·复习"],["print","打印"]]
+  :[["board","看板"],["warn","预警"],["printP","周报打印"],["check","抽查"]];
+ $("#tabs").innerHTML=tabs.map(function(t){return '<button class="'+(state.tab===t[0]?"on":"")+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+"</button>"}).join("");
+ var a=$("#app");
+ if(state.tab==="collect")a.innerHTML=viewCollect();
+ else if(state.tab==="attr")a.innerHTML=state.cur?viewAttrForm():viewAttrList();
+ else if(state.tab==="practice")a.innerHTML=viewPractice();
+ else if(state.tab==="print")a.innerHTML=viewPrint(false);
+ else if(state.tab==="board")a.innerHTML=viewBoard();
+ else if(state.tab==="warn")a.innerHTML=viewWarn();
+ else if(state.tab==="printP")a.innerHTML=viewPrint(true);
+ else if(state.tab==="check")a.innerHTML=viewCheck();
+}
+
+function tagChips(sel){
+ var html="";
+ TAGS.forEach(function(g){html+='<div class="hint" style="margin:8px 0 2px">'+esc(g.g)+"</div>";
+  html+='<div class="chips">'+g.items.map(function(t){return '<span class="chip '+(sel.indexOf(t)>=0?"on":"")+'" onclick="toggleTag(\''+t+'\')">'+esc(t)+"</span>"}).join("")+"</div>"});
+ if(state.recent.length){html+='<div class="hint" style="margin:10px 0 2px">最近用过（一键复用）</div><div class="chips">'
+  +state.recent.slice(0,4).map(function(t){return '<span class="chip" onclick="toggleTag(\''+t+'\')">+ '+esc(t)+"</span>"}).join("")+"</div>"}
+ return html;
+}
+function toggleTag(t){var i=state.tagSel.indexOf(t);if(i>=0)state.tagSel.splice(i,1);else state.tagSel.push(t);render()}
+
+function viewCollect(){
+ return '<div class="card"><h2>30 秒收集 <span class="badge b-p">零打字</span></h2>'
+ +'<div class="hint">扣 1 分也是错题。整页拍（含错解和红叉），点一下标签，完成。归因放到每日 10 分钟时段。</div>'
+ +'<label>1 · 拍照 / 选图（可多张）</label>'
+ +'<input type="file" accept="image/*" capture="environment" multiple onchange="addPhotos(this.files)" style="width:100%">'
+ +(state.draftPhotos.length?'<div class="chips">'+state.draftPhotos.map(function(p,i){return '<span class="chip on g">图'+(i+1)+' <span onclick="delPhoto('+i+')">✕</span></span>'}).join("")+"</div>":"")
+ +'<label>2 · 知识点标签（可多选）</label>'+tagChips(state.tagSel)
+ +'<label>3 · 得分情况</label><div class="chips" id="scoreChips">'
+ +'<span class="chip on" id="sc1" onclick="pickScore(1)">全错</span>'
+ +'<span class="chip" id="sc2" onclick="pickScore(2)">部分得分</span>'
+ +'<input type="text" id="scoreText" placeholder='选"部分得分"后填：得__扣__' style="display:none;flex:1;min-width:160px"></div>'
+ +'<label>4 · 来源</label><div class="chips" id="srcChips">'
+ +["作业","周测","月考","课本","自测"].map(function(s,i){return '<span class="chip '+(i===0?"on":"")+'" onclick="pickSrc(this,\''+s+'\')">'+s+"</span>"}).join("")+"</div>"
+ +'<button class="btn pri" onclick="saveCollect()">保存（≤30秒）</button> '
+ +'<button class="btn ghost" onclick="resetCollect()">清空</button>'
+ +"</div>";
+}
+function addPhotos(files){var arr=[].slice.call(files);if(!arr.length)return;Promise.all(arr.map(readImage)).then(function(ps){state.draftPhotos=state.draftPhotos.concat(ps);render();toast("已加入 "+ps.length+" 张图，记得点标签后保存")})}
+function delPhoto(i){state.draftPhotos.splice(i,1);render()}
+function pickScore(n){$("#sc1").className=n===1?"chip on":"chip";$("#sc2").className=n===2?"chip on":"chip";$("#scoreText").style.display=n===2?"inline-block":"none"}
+function pickSrc(el,s){[].forEach.call(document.querySelectorAll("#srcChips .chip"),function(c){c.className="chip"});el.className="chip on"}
+function resetCollect(){state.draftPhotos=[];state.tagSel=[];render()}
+function saveCollect(){
+ if(!state.draftPhotos.length&&!state.tagSel.length){toast("至少拍一张图或选一个标签");return}
+ var st=document.querySelector("#sc1").className.indexOf("on")>=0?"全错":"部分得分";
+ var src="作业";[].forEach.call(document.querySelectorAll("#srcChips .chip"),function(c){if(c.className.indexOf("on")>=0)src=c.textContent});
+ var m={id:Date.now(),createdAt:today(),source:src,tags:state.tagSel.slice(),scoreType:st,
+  scoreText:st==="部分得分"?($("#scoreText").value||"部分得分"):"",photos:state.draftPhotos.slice(),
+  status:"collected",attrib:null,variants:[],
+  review:{stageIdx:0,next:null,history:[]},parentChecks:[]};
+ save(m).then(function(){
+  state.tagSel.forEach(function(t){var i=state.recent.indexOf(t);if(i>=0)state.recent.splice(i,1);state.recent.unshift(t)});
+  state.draftPhotos=[];state.tagSel=[];render();toast("已入库。归因放到每日 10 分钟时段");
+ });
+}
+
+function viewAttrList(){
+ var p=pending();
+ if(!p.length)return '<div class="card"><h2>每日 10 分钟归因</h2><div class="alert g">当前没有待归因的题。先去"收集"。</div></div>';
+ return '<div class="card"><h2>每日 10 分钟归因 <span class="badge b-a">待归因 '+p.length+" 题</span></h2>"
+ +'<div class="hint">每题约 30-60 秒：AI 预填初稿 → 你必须至少改一处 → 填正确解法。句式模板会自动拼好。</div>'
+ +p.map(function(m){return '<div class="item"><div class="meta">'+esc(m.createdAt)+" · "+esc(m.source)+" · "+(m.tags[0]||"未标")+'<span class="badge '+(m.scoreType==="部分得分"?"b-a":"b-r")+'">'+esc(m.scoreType)+"</span></div>"
+  +(m.photos[0]?'<img src="'+m.photos[0]+'" alt="错题图">':"")
+  +'<button class="btn pri sm" onclick="openAttr('+m.id+')">开始归因</button> '
+  +'<button class="btn ghost sm" onclick="delItem('+m.id+')">删除</button></div>'}).join("")+"</div>";
+}
+function delItem(id){if(!confirm("确认删除这道题？"))return;DB.del(id).then(function(){M=M.filter(function(m){return m.id!==id});render();toast("已删除")})}
+function openAttr(id){state.cur=M.filter(function(m){return m.id===id})[0];state.prefillSnap=null;render()}
+
+function viewAttrForm(){
+ var m=state.cur;
+ var sug=SUGGEST[$("#stageSel")?$("#stageSel").value:"看不出"]||SUGGEST["看不出"];
+ return '<div class="card"><h2>归因 · '+esc(m.tags[0]||"未标标签")+'</h2>'
+ +'<button class="btn ghost sm" onclick="state.cur=null;render()">← 返回列表</button>'
+ +(m.photos.map(function(p){return '<img src="'+p+'" alt="错题图">'}).join(""))
+ +'<label>1 · 独立完成到第几步 / 卡在第几步</label><div class="row">'
+ +'<div><input type="number" id="doneTo" min="0" placeholder="独立完成到第几步" value="'+(m.attrib?m.attrib.doneTo:"")+'"></div>'
+ +'<div><input type="number" id="stuckAt" min="1" placeholder="卡在第几步" value="'+(m.attrib?m.attrib.stuckAt:"")+'"></div></div>'
+ +'<label>2 · 思维段（记最先断的那一段）</label><div class="chips" id="stageChips">'
+ +STAGES.map(function(s,i){return '<span class="chip '+(i===0?"on":"")+'" onclick="pickStage(this,\''+s+'\')">'+s+"</span>"}).join("")+"</div>"
+ +'<label>3 · 缺的思维动作（一句话）</label>'
+ +'<div class="chips"><button class="btn sm" onclick="doPrefill()">AI 预填初稿</button>'
+ +'<span class="hint" style="margin:6px">本地卡点建议库，离线可用</span></div>'
+ +'<textarea id="missing" placeholder="例：没想到用电荷守恒检查配平"></textarea>'
+ +'<div id="sugBox"></div>'
+ +'<div class="sentence" id="sentBox">归因句式（自动拼装）：我在第 <b>?</b> 步卡住，属于 <b>?</b>，因为 <b>?</b></div>'
+ +'<label>4 · 正确解法（自己写，必填）</label>'
+ +'<textarea id="solution" placeholder="按标准步骤写，写清每步依据">'+(m.attrib?esc(m.attrib.solution):"")+"</textarea>"
+ +'<button class="btn pri" onclick="confirmAttr()">确认归因（必须改过预填）</button> '
+ +'<button class="btn ghost" onclick="state.cur=null;render()">稍后再做</button>'
+ +"</div>";
+}
+function pickStage(el,s){[].forEach.call(document.querySelectorAll("#stageChips .chip"),function(c){c.className="chip"});el.className="chip on";updateSent()}
+function doPrefill(){
+ var s=document.querySelector("#stageChips .chip.on");var stage=s?s.textContent:STAGES[0];
+ var list=SUGGEST[stage]||SUGGEST["看不出"];
+ var v=list[Math.floor(Math.random()*list.length)];
+ $("#missing").value=v;state.prefillSnap=v;updateSent();
+ $("#sugBox").innerHTML='<div class="alert a">已预填初稿（本地建议库）。<b>你必须至少修改一处</b>——把话说成你这道题的具体情况，否则等于没归因。</div>'
+ +'<div class="chips">'+list.map(function(x){return '<span class="chip" onclick="pickSug(\''+x.replace(/'/g,"")+'\')">'+esc(x)+"</span>"}).join("")+"</div>";
+ toast("预填完成，请改成你这道题的具体情况");
+}
+function pickSug(v){$("#missing").value=v;updateSent()}
+function updateSent(){
+ var s=document.querySelector("#stageChips .chip.on");var stage=s?s.textContent:"?";
+ var d=$("#doneTo").value||"?";var st=$("#stuckAt").value||"?";var ms=$("#missing").value||"?";
+ if($("#sentBox"))$("#sentBox").innerHTML="归因句式（自动拼装）：我在第 <b>"+esc(st)+'</b> 步卡住（独立完成到第 '+esc(d)+" 步），属于 <b>"+esc(stage)+"</b>，因为 <b>"+esc(ms)+"</b>";
+}
+function confirmAttr(){
+ var m=state.cur;
+ var missing=$("#missing").value.trim();
+ if(!missing){toast("缺的思维动作不能为空");return}
+ if(missing==="粗心"||missing==="马虎"||missing==="不细心"){toast("“粗心”不是归因——请具体到：没看出/没想到/没算对/没写全什么");return}
+ if(state.prefillSnap&&missing===state.prefillSnap){toast("请至少修改一处预填内容——把话说成你这道题的具体情况");return}
+ var sol=$("#solution").value.trim();
+ if(!sol){toast("正确解法必填（自己写）");return}
+ var s=document.querySelector("#stageChips .chip.on");var stage=s?s.textContent:STAGES[0];
+ m.attrib={doneTo:$("#doneTo").value,stuckAt:$("#stuckAt").value,stage:stage,missing:missing,
+  sentence:"我在第 "+($("#stuckAt").value||"?")+" 步卡住（独立完成到第 "+($("#doneTo").value||"?")+" 步），属于"+stage+"，因为"+missing,
+  solution:sol};
+ m.status="attributed";
+ m.review.stageIdx=0;m.review.next=addDays(1);
+ save(m).then(function(){state.cur=null;state.prefillSnap=null;render();toast("归因完成，明天进入复习队列")});
+}
+
+function viewPractice(){
+ var list=attributed();
+ var due=dueToday();
+ var out='<div class="card"><h2>今日待复习 <span class="badge '+(due.length?"b-r":"b-g")+'">'+due.length+" 题</span></h2>";
+ if(!due.length)out+='<div class="alert g">今天没有到期的复习题。</div>';
+ out+=due.map(function(m){
+  var vs=(m.variants||[]).filter(function(v){return v.verified});
+  return '<div class="item"><div class="meta">'+esc(m.createdAt)+" · "+esc(m.tags[0]||"")+'</div>'
+  +'<div class="sentence">'+esc(m.attrib.sentence)+"</div>"
+  +'<div class="hint">正确解法：'+esc(m.attrib.solution)+"</div>"
+  +(vs.length?'<div class="hint">权威变式（已核对）：<ul style="margin:4px 0 0 18px">'+vs.map(function(v){return "<li>"+esc(v.text)+"　来源："+esc(v.srcType)+" "+esc(v.srcLoc)+"</li>"}).join("")+"</ul></div>":"")
+  +'<button class="btn pri sm" onclick="markReview('+m.id+',3)">掌握</button>'
+  +'<button class="btn sm" onclick="markReview('+m.id+',2)">模糊</button>'
+  +'<button class="btn warn sm" onclick="markReview('+m.id+',1)">未掌握</button></div>'}).join("")+"</div>";
+
+ out+='<div class="card"><h2>变式管理 <span class="badge b-p">来源必填 · AI 题需审核</span></h2>'
+ +'<div class="hint">教辅/教材/真题题按来源录入；AI 出的题只能存为"草稿"，人工核对通过前不进复习队列与打印卷。</div>'
+ +list.map(function(m){return '<div class="item"><div class="meta">'+esc(m.createdAt)+" · "+esc(m.tags[0]||"")+" · 卡点："+esc(m.attrib?m.attrib.stage:"")+"</div>"
+  +(m.variants||[]).map(function(v,i){return '<div class="hint">· '+esc(v.text)+'<span class="badge '+(v.verified?"b-g":"b-a")+'">'+(v.verified?"已核对":"未核对")+"</span>"
+   +'<span class="hint">来源：'+esc(v.srcType)+" "+esc(v.srcLoc)+"</span>"
+   +(v.verified?"":' <button class="btn sm" onclick="verifyV('+m.id+","+i+')">人工核对通过</button>')
+   +' <button class="btn ghost sm" onclick="delV('+m.id+","+i+')">删</button></div>'}).join("")
+  +'<details style="margin-top:6px"><summary class="btn sm ghost" style="display:inline-block">+ 加一道变式</summary>'
+  +'<label>题干</label><textarea id="vt'+m.id+'"></textarea>'
+  +'<label>参考答案</label><textarea id="va'+m.id+'"></textarea>'
+  +'<label>来源类型</label><div class="chips" id="vs'+m.id+'">'
+  +["教辅","教材","真题","AI草稿"].map(function(s,i){return '<span class="chip '+(i===0?"on":"")+'" onclick="pickOne(this)">'+s+"</span>"}).join("")+"</div>"
+  +'<label>来源定位（教辅=书名+页码；真题=年份+卷别+题号；教材=版本+页码）</label><input type="text" id="vl'+m.id+'">'
+  +'<button class="btn pri sm" onclick="addV('+m.id+')">保存变式</button></details></div>'}).join("")+"</div>";
+ return out;
+}
+function pickOne(el){[].forEach.call(el.parentNode.children,function(c){c.className="chip"});el.className="chip on"}
+function markReview(id,lv){
+ var m=M.filter(function(x){return x.id===id})[0];if(!m)return;
+ if(lv===3){m.review.stageIdx=Math.min(m.review.stageIdx+1,INTERVALS.length-1);m.review.next=addDays(INTERVALS[m.review.stageIdx])}
+ else if(lv===2){m.review.next=addDays(2)}
+ else{m.review.stageIdx=0;m.review.next=addDays(1)}
+ m.review.history.push({date:today(),lv:lv});
+ save(m).then(function(){render();toast("下次复习："+m.review.next)});
+}
+function addV(id){
+ var m=M.filter(function(x){return x.id===id})[0];
+ var t=$("#vt"+id).value.trim(),a=$("#va"+id).value.trim(),l=$("#vl"+id).value.trim();
+ if(!t){toast("变式题干不能为空");return}
+ var src="教辅";[].forEach.call(document.querySelectorAll("#vs"+id+" .chip"),function(c){if(c.className.indexOf("on")>=0)src=c.textContent});
+ if(src!=="AI草稿"&&!l){toast("来源定位必填：教辅=书名+页码 / 真题=年份卷别题号 / 教材=版本+页码");return}
+ m.variants=m.variants||[];
+ m.variants.push({text:t,answer:a,srcType:src,srcLoc:l,verified:src!=="AI草稿"?true:false});
+ save(m).then(function(){render();toast(src==="AI草稿"?"已存为草稿，需人工核对后才能进复习/打印":"变式已保存，来源可查")});
+}
+function verifyV(id,i){var m=M.filter(function(x){return x.id===id})[0];m.variants[i].verified=true;save(m).then(function(){render();toast("已核对通过")})}
+function delV(id,i){var m=M.filter(function(x){return x.id===id})[0];m.variants.splice(i,1);save(m).then(function(){render()})}
+
+function viewPrint(isParent){
+ var out='<div class="card"><h2>'+(isParent?"周报与错题打印":"打印")+"</h2>";
+ if(isParent){
+  out+='<div class="hint">周报包含新增/闭环/积压与薄弱点 Top3；勾选后打印，贴在书桌前。</div>'
+  +'<button class="btn pri" onclick="printWeekly()">打印周报（A4）</button> ';
+ }
+ out+='<div class="hint" style="margin-top:10px">错题卡：正面=题目+归因（红框），背面=正确解法+已核对变式。建议双面打印。</div>'
+ +'<div class="chips">'+attributed().map(function(m){return '<span class="chip on" id="pc'+m.id+'" onclick="togglePrint('+m.id+')">'+esc(m.tags[0]||"题")+" · "+esc(m.createdAt.slice(5))+"</span>"}).join("")+"</div>"
+ +'<button class="btn pri" onclick="printCards()">打印勾选的错题卡</button> '
+ +'<button class="btn ghost" onclick="selectAllPrint(true)">全选</button>'
+ +'<button class="btn ghost" onclick="selectAllPrint(false)">全不选</button></div>';
+ return out;
+}
+var printSel={};
+function togglePrint(id){var c=$("#pc"+id);printSel[id]=!(printSel[id]!==false);c.className=printSel[id]?"chip on":"chip"}
+function selectAllPrint(v){attributed().forEach(function(m){printSel[m.id]=v});render()}
+function printCards(){
+ var list=attributed().filter(function(m){return printSel[m.id]!==false});
+ if(!list.length){toast("先勾选要打印的题");return}
+ $("#printArea").innerHTML=list.map(function(m){
+  var vs=(m.variants||[]).filter(function(v){return v.verified});
+  return '<div class="pcard"><div class="side">错题卡 · 正面　'+esc(m.createdAt)+" · "+esc(m.tags[0]||"")+" · "+esc(m.source)+" · "+esc(m.scoreType)+" "+esc(m.scoreText)+"</div>"
+  +(m.photos.map(function(p){return '<img src="'+p+'">'}).join(""))
+  +'<div class="red">我的归因：'+esc(m.attrib.sentence)+"</div>"
+  +'<div class="back"><b>背面 · 正确解法</b><div>'+esc(m.attrib.solution).replace(/\n/g,"<br>")+"</div>"
+  +'<div style="margin-top:8px"><b>权威变式（已核对）</b>'+(vs.length?"<ul style='margin:4px 0 0 18px'>"+vs.map(function(v){return "<li>"+esc(v.text)+"　【"+esc(v.srcType)+" "+esc(v.srcLoc)+"】</li>"}).join("")+"</ul>":"（暂无）")
+  +'</div><div style="margin-top:8px">复习勾选：□ 1天　□ 2天　□ 4天　□ 7天　□ 15天　□ 30天　　重做结果：□ 对　□ 错</div></div></div>'}).join("");
+ window.print();
+}
+function printWeekly(){
+ var wk=today().slice(0,4)+"-W"+Math.ceil((new Date().getDate())/7);
+ var added=M.filter(function(m){return daysBetween(m.createdAt,today())<=7}).length;
+ var closed=attributed().filter(function(m){return m.review&&m.review.stageIdx>=3}).length;
+ var late=pending().length;
+ var partial=M.filter(function(m){return m.scoreType==="部分得分"}).length;
+ var matrix={};
+ attributed().forEach(function(m){if(!m.attrib)return;m.tags.forEach(function(t){var k=t+" × "+m.attrib.stage;matrix[k]=(matrix[k]||0)+1})});
+ var top=Object.keys(matrix).sort(function(a,b){return matrix[b]-matrix[a]}).slice(0,3);
+ $("#printArea").innerHTML='<div class="pcard"><div class="side">化学错题闭环 · 周报　'+wk+"（"+today()+"）</div>"
+ +'<table><tr><th>本周新增</th><th>已闭环</th><th>待归因积压</th><th>部分得分题</th></tr><tr><td>'+added+"</td><td>"+closed+'</td><td class="'+(late>0?"no":"ok")+'">'+late+"</td><td>"+partial+"</td></tr></table>"
+ +'<h3>薄弱点 Top3（知识点 × 思维段）</h3>'+(top.length?"<ol>"+top.map(function(k){return "<li>"+esc(k)+"（"+matrix[k]+" 次）</li>"}).join("")+"</ol>":"（数据不足，先跑两周）")
+ +'<div class="red">家长叮嘱（按方向说，不说"下次细心"）：本周重点练 ______</div>'
+ +'<div class="back"><b>本周抽查记录</b>：□ 已抽 3 题重做　结果：______</div></div>';
+ window.print();
+}
+
+function viewBoard(){
+ var added=M.filter(function(m){return daysBetween(m.createdAt,today())<=7}).length;
+ var closed=attributed().filter(function(m){return m.review&&m.review.stageIdx>=3}).length;
+ var late=pending().length;
+ var partial=M.filter(function(m){return m.scoreType==="部分得分"}).length;
+ var pct=M.length?Math.round(partial/M.length*100):0;
+ var matrix={};var tags={};
+ attributed().forEach(function(m){if(!m.attrib)return;m.tags.forEach(function(t){tags[t]=1;var k=t+"|"+m.attrib.stage;matrix[k]=(matrix[k]||0)+1})});
+ var tagList=Object.keys(tags);var out="";
+ if(tagList.length){
+  out='<table><tr><th>知识点 \\ 思维段</th>'+STAGES.map(function(s){return "<th>"+s+"</th>"}).join("")+"</tr>"
+  +tagList.map(function(t){return "<tr><td>"+esc(t)+"</td>"+STAGES.map(function(s){var n=matrix[t+"|"+s]||0;return '<td class="'+(n>=3?"no":n>0?"":"")+'">'+(n||"")+"</td>"}).join("")+"</tr>"}).join("")+"</table>"
+  +'<div class="hint">读法：哪一列数字大 = 弱在哪个思维动作；数字 ≥3 标红，优先练。</div>';
+ }else out='<div class="hint">归因数据不足。先在"学生→归因"做 5 题，矩阵才有意义。</div>';
+ return '<div class="card"><h2>家长看板（只看状态，不判内容）</h2><div class="row">'
+ +'<div class="stat"><div class="n">'+added+'</div><div class="l">本周新增</div></div>'
+ +'<div class="stat"><div class="n">'+closed+'</div><div class="l">已闭环</div></div>'
+ +'<div class="stat"><div class="n '+(late?"no":"ok")+'">'+late+'</div><div class="l">待归因积压</div></div>'
+ +'<div class="stat"><div class="n">'+pct+'%</div><div class="l">部分得分题占比</div></div></div>'
+ +'<div class="hint">"部分得分题占比"下降 = 提分最直接的信号。积压 &gt;2 天请到"预警"页处理。</div>'
+ +'<h3>知识点 × 思维段矩阵</h3>'+out+"</div>";
+}
+function viewWarn(){
+ var p=pending();
+ var red=p.filter(function(m){return daysBetween(m.createdAt,today())>2});
+ var due=dueToday();
+ var out='<div class="card"><h2>积压预警</h2>';
+ if(red.length)out+='<div class="alert red"><b>红色预警：</b>'+red.length+" 题待归因超过 2 天——错题欠账正在变多。请提醒孩子今晚做 10 分钟归因。</div>";
+ if(p.length&&!red.length)out+='<div class="alert a">'+p.length+" 题待归因（未超 2 天）。正常，盯今晚的 10 分钟归因时段即可。</div>";
+ if(!p.length)out+='<div class="alert g">无待归因积压。</div>';
+ out+=p.map(function(m){var old=daysBetween(m.createdAt,today())>2;return '<div class="item"><div class="meta">'+esc(m.createdAt)+" · "+esc(m.tags[0]||"")+" · 已放 "+daysBetween(m.createdAt,today())+' 天</div><span class="badge '+(old?"b-r":"b-a")+'">'+(old?"超期":"待归因")+'</span> <button class="btn ghost sm" onclick="delItem('+m.id+')">删除</button></div>'}).join("")
+ +'<h3>复习逾期</h3>'+(due.length?'<div class="alert a">'+due.length+" 题到了复习日还没复习。</div>":'<div class="alert g">无逾期复习。</div>')+"</div>";
+ return out;
+}
+function viewCheck(){
+ var pool=attributed();
+ var out='<div class="card"><h2>每周抽查 <span class="badge b-p">打印 3 题 · 不看答案重做</span></h2>'
+ +'<div class="hint">抽查是"防欠账"的最终检验：随机抽 3 题打印出来，让孩子不看答案重做，对错记在这里。</div>';
+ if(pool.length<3)out+='<div class="alert a">归因题不足 3 题，暂无法抽查。</div>';
+ else{
+  var pick=pool.slice().sort(function(){return Math.random()-0.5}).slice(0,3);
+  out+=pick.map(function(m){var last=m.parentChecks&&m.parentChecks.length?m.parentChecks[m.parentChecks.length-1]:null;
+   return '<div class="item"><div class="meta">'+esc(m.createdAt)+" · "+esc(m.tags[0]||"")+" · "+esc(m.attrib.stage)+"</div>"
+   +'<div class="hint">'+esc(m.attrib.sentence)+"</div>"
+   +(last?'<div class="hint">上次抽查 '+esc(last.date)+"："+(last.ok?'<span class="ok">对</span>':'<span class="no">错</span>')+"</div>":"")
+   +'<button class="btn sm" onclick="checkOne('+m.id+',1)">重做对</button><button class="btn warn sm" onclick="checkOne('+m.id+',0)">重做错（回流归因）</button></div>'}).join("");
+ }
+ return out+"</div>";
+}
+function checkOne(id,ok){
+ var m=M.filter(function(x){return x.id===id})[0];
+ m.parentChecks=m.parentChecks||[];m.parentChecks.push({date:today(),ok:!!ok});
+ if(!ok){m.status="collected";m.review.next=null}
+ save(m).then(function(){render();toast(ok?"已记录：重做正确":"已记录：重做错误，题已回流到归因列表")});
+}
+
+function exportJSON(){
+ var data={app:"chem-loop",version:"3.1",exported:today(),tags:TAGS,recent:state.recent,mistakes:M};
+ var blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+ var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="化学错题备份-"+today()+".json";a.click();
+ toast("已导出，请妥善保存（建议手机电脑各存一份）");
+}
+function importJSON(file){
+ if(!file)return;var fr=new FileReader();
+ fr.onload=function(){try{var d=JSON.parse(fr.result);
+  if(d.mistakes&&confirm("导入 "+d.mistakes.length+" 条记录？（同 id 覆盖）")){
+   Promise.all(d.mistakes.map(save)).then(function(){if(d.recent)state.recent=d.recent;render();toast("导入完成")});
+  }}catch(e){toast("文件解析失败，请确认是本工具导出的 JSON")}};
+ fr.readAsText(file);
+}
+
+document.addEventListener("input",function(e){if(e.target.id==="doneTo"||e.target.id==="stuckAt"||e.target.id==="missing")updateSent()});
+DB.all().then(function(rows){M=rows.sort(function(a,b){return b.id-a.id});render()});
+</script>
+</body>
+</html>
