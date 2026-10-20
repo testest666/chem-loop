@@ -106,7 +106,7 @@ var SUGGEST={
  "写不好":["漏写必要步骤或依据","漏讨论过量/少量、过量产物等情形","术语/化学用语不规范","单位或有效数字不合要求"]
 };
 var INTERVALS=[1,2,4,7,15,30];
-var state={view:"student",tab:"collect",cur:null,tagSel:[],recent:[],prefillSnap:null,draftPhotos:[]};
+var state={view:"student",tab:"collect",cur:null,tagSel:[],recent:[],prefillSnap:null,draftPhotos:[],kpSel:null};
 
 function $(s){return document.querySelector(s)}
 function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
@@ -138,13 +138,14 @@ function render(){
  $("#vStu").className=state.view==="student"?"on":"";
  $("#vPar").className=state.view==="parent"?"on":"";
  var tabs=state.view==="student"
-  ?[["collect","收集(30秒)"],["attr","归因(10分钟)"],["practice","变式·复习"],["print","打印"]]
-  :[["board","看板"],["warn","预警"],["printP","周报打印"],["check","抽查"]];
+  ?[["collect","收集(30秒)"],["attr","归因(10分钟)"],["practice","变式·复习"],["archive","知识点归档"],["print","打印"]]
+  :[["board","看板"],["warn","预警"],["archive","知识点归档"],["printP","周报打印"],["check","抽查"]];
  $("#tabs").innerHTML=tabs.map(function(t){return '<button class="'+(state.tab===t[0]?"on":"")+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+"</button>"}).join("");
  var a=$("#app");
  if(state.tab==="collect")a.innerHTML=viewCollect();
  else if(state.tab==="attr")a.innerHTML=state.cur?viewAttrForm():viewAttrList();
  else if(state.tab==="practice")a.innerHTML=viewPractice();
+ else if(state.tab==="archive")a.innerHTML=viewArchive();
  else if(state.tab==="print")a.innerHTML=viewPrint(false);
  else if(state.tab==="board")a.innerHTML=viewBoard();
  else if(state.tab==="warn")a.innerHTML=viewWarn();
@@ -172,7 +173,7 @@ function viewCollect(){
  +'<label>3 · 得分情况</label><div class="chips" id="scoreChips">'
  +'<span class="chip on" id="sc1" onclick="pickScore(1)">全错</span>'
  +'<span class="chip" id="sc2" onclick="pickScore(2)">部分得分</span>'
- +'<input type="text" id="scoreText" placeholder='选"部分得分"后填：得__扣__' style="display:none;flex:1;min-width:160px"></div>'
+ +'<input type="text" id="scoreText" placeholder="选『部分得分』后填：得__扣__" style="display:none;flex:1;min-width:160px"></div>'
  +'<label>4 · 来源</label><div class="chips" id="srcChips">'
  +["作业","周测","月考","课本","自测"].map(function(s,i){return '<span class="chip '+(i===0?"on":"")+'" onclick="pickSrc(this,\''+s+'\')">'+s+"</span>"}).join("")+"</div>"
  +'<button class="btn pri" onclick="saveCollect()">保存（≤30秒）</button> '
@@ -222,13 +223,16 @@ function viewAttrForm(){
  +'<div><input type="number" id="stuckAt" min="1" placeholder="卡在第几步" value="'+(m.attrib?m.attrib.stuckAt:"")+'"></div></div>'
  +'<label>2 · 思维段（记最先断的那一段）</label><div class="chips" id="stageChips">'
  +STAGES.map(function(s,i){return '<span class="chip '+(i===0?"on":"")+'" onclick="pickStage(this,\''+s+'\')">'+s+"</span>"}).join("")+"</div>"
- +'<label>3 · 缺的思维动作（一句话）</label>'
+ +'<label>3 · 错因知识点（跨知识点题必选：错在哪个点上）</label><div class="chips" id="kpChips">'
+ +(m.tags.length?m.tags:["未分类"]).map(function(t,i){return '<span class="chip '+(i===0?"on":"")+'" onclick="pickOne(this)">'+esc(t)+"</span>"}).join("")+"</div>"
+ +'<input type="text" id="kpCustom" placeholder="标签里没有？在这里补一个知识点（可选）">'
+ +'<label>4 · 缺的思维动作（一句话）</label>'
  +'<div class="chips"><button class="btn sm" onclick="doPrefill()">AI 预填初稿</button>'
  +'<span class="hint" style="margin:6px">本地卡点建议库，离线可用</span></div>'
  +'<textarea id="missing" placeholder="例：没想到用电荷守恒检查配平"></textarea>'
  +'<div id="sugBox"></div>'
  +'<div class="sentence" id="sentBox">归因句式（自动拼装）：我在第 <b>?</b> 步卡住，属于 <b>?</b>，因为 <b>?</b></div>'
- +'<label>4 · 正确解法（自己写，必填）</label>'
+ +'<label>5 · 正确解法（自己写，必填）</label>'
  +'<textarea id="solution" placeholder="按标准步骤写，写清每步依据">'+(m.attrib?esc(m.attrib.solution):"")+"</textarea>"
  +'<button class="btn pri" onclick="confirmAttr()">确认归因（必须改过预填）</button> '
  +'<button class="btn ghost" onclick="state.cur=null;render()">稍后再做</button>'
@@ -259,7 +263,9 @@ function confirmAttr(){
  var sol=$("#solution").value.trim();
  if(!sol){toast("正确解法必填（自己写）");return}
  var s=document.querySelector("#stageChips .chip.on");var stage=s?s.textContent:STAGES[0];
- m.attrib={doneTo:$("#doneTo").value,stuckAt:$("#stuckAt").value,stage:stage,missing:missing,
+ var kpChip=document.querySelector("#kpChips .chip.on");
+ var kpVal=$("#kpCustom").value.trim()||(kpChip?kpChip.textContent:"")||m.tags[0]||"未分类";
+ m.attrib={doneTo:$("#doneTo").value,stuckAt:$("#stuckAt").value,stage:stage,kp:kpVal,missing:missing,
   sentence:"我在第 "+($("#stuckAt").value||"?")+" 步卡住（独立完成到第 "+($("#doneTo").value||"?")+" 步），属于"+stage+"，因为"+missing,
   solution:sol};
  m.status="attributed";
@@ -336,18 +342,23 @@ function viewPrint(isParent){
 var printSel={};
 function togglePrint(id){var c=$("#pc"+id);printSel[id]=!(printSel[id]!==false);c.className=printSel[id]?"chip on":"chip"}
 function selectAllPrint(v){attributed().forEach(function(m){printSel[m.id]=v});render()}
-function printCards(){
- var list=attributed().filter(function(m){return printSel[m.id]!==false});
- if(!list.length){toast("先勾选要打印的题");return}
- $("#printArea").innerHTML=list.map(function(m){
+function buildCards(list){return list.map(function(m){
   var vs=(m.variants||[]).filter(function(v){return v.verified});
-  return '<div class="pcard"><div class="side">错题卡 · 正面　'+esc(m.createdAt)+" · "+esc(m.tags[0]||"")+" · "+esc(m.source)+" · "+esc(m.scoreType)+" "+esc(m.scoreText)+"</div>"
+  return '<div class="pcard"><div class="side">错题卡 · 正面　'+esc(m.createdAt)+" · "+esc(kpOf(m))+" · "+esc(m.source)+" · "+esc(m.scoreType)+" "+esc(m.scoreText)+"</div>"
   +(m.photos.map(function(p){return '<img src="'+p+'">'}).join(""))
   +'<div class="red">我的归因：'+esc(m.attrib.sentence)+"</div>"
   +'<div class="back"><b>背面 · 正确解法</b><div>'+esc(m.attrib.solution).replace(/\n/g,"<br>")+"</div>"
   +'<div style="margin-top:8px"><b>权威变式（已核对）</b>'+(vs.length?"<ul style='margin:4px 0 0 18px'>"+vs.map(function(v){return "<li>"+esc(v.text)+"　【"+esc(v.srcType)+" "+esc(v.srcLoc)+"】</li>"}).join("")+"</ul>":"（暂无）")
-  +'</div><div style="margin-top:8px">复习勾选：□ 1天　□ 2天　□ 4天　□ 7天　□ 15天　□ 30天　　重做结果：□ 对　□ 错</div></div></div>'}).join("");
- window.print();
+  +'</div><div style="margin-top:8px">复习勾选：□ 1天　□ 2天　□ 4天　□ 7天　□ 15天　□ 30天　　重做结果：□ 对　□ 错</div></div></div>'}).join("")}
+function printCards(){
+ var list=attributed().filter(function(m){return printSel[m.id]!==false});
+ if(!list.length){toast("先勾选要打印的题");return}
+ $("#printArea").innerHTML=buildCards(list);window.print();
+}
+function printKp(){
+ var list=attributed().filter(function(m){return kpOf(m)===state.kpSel});
+ if(!list.length){toast("该知识点下没有题");return}
+ $("#printArea").innerHTML=buildCards(list);window.print();
 }
 function printWeekly(){
  var wk=today().slice(0,4)+"-W"+Math.ceil((new Date().getDate())/7);
@@ -356,7 +367,7 @@ function printWeekly(){
  var late=pending().length;
  var partial=M.filter(function(m){return m.scoreType==="部分得分"}).length;
  var matrix={};
- attributed().forEach(function(m){if(!m.attrib)return;m.tags.forEach(function(t){var k=t+" × "+m.attrib.stage;matrix[k]=(matrix[k]||0)+1})});
+ attributed().forEach(function(m){if(!m.attrib)return;var k=kpOf(m)+" × "+m.attrib.stage;matrix[k]=(matrix[k]||0)+1});
  var top=Object.keys(matrix).sort(function(a,b){return matrix[b]-matrix[a]}).slice(0,3);
  $("#printArea").innerHTML='<div class="pcard"><div class="side">化学错题闭环 · 周报　'+wk+"（"+today()+"）</div>"
  +'<table><tr><th>本周新增</th><th>已闭环</th><th>待归因积压</th><th>部分得分题</th></tr><tr><td>'+added+"</td><td>"+closed+'</td><td class="'+(late>0?"no":"ok")+'">'+late+"</td><td>"+partial+"</td></tr></table>"
@@ -366,6 +377,26 @@ function printWeekly(){
  window.print();
 }
 
+function kpOf(m){return (m.attrib&&m.attrib.kp)||m.tags[0]||"未分类"}
+function viewArchive(){
+ var byKp={};
+ attributed().forEach(function(m){var k=kpOf(m);(byKp[k]=byKp[k]||[]).push(m)});
+ var kps=Object.keys(byKp).sort(function(a,b){return byKp[b].length-byKp[a].length});
+ if(!kps.length)return '<div class="card"><h2>知识点归档</h2><div class="alert g">还没有已归因的题。先在"归因"里做完，这里会按错因知识点自动归档。</div></div>';
+ if(!state.kpSel||!byKp[state.kpSel])state.kpSel=kps[0];
+ var list=byKp[state.kpSel];
+ var dist=STAGES.map(function(s){var n=list.filter(function(m){return m.attrib.stage===s}).length;return n?s+" "+n:""}).filter(Boolean).join(" / ");
+ return '<div class="card"><h2>知识点归档 <span class="badge b-p">按错因知识点分类</span></h2>'
+ +'<div class="hint">跨知识点题的归因已定位到具体"错因知识点"。点下方知识点，看该点下所有归因；可直接打印该知识点专项错题卡（哪章弱就专攻哪章）。</div>'
+ +'<div class="chips">'+kps.map(function(k){return '<span class="chip '+(k===state.kpSel?"on":"")+'" onclick="selKp(\''+k+'\')">'+esc(k)+"（"+byKp[k].length+"）</span>"}).join("")+"</div>"
+ +'<div class="hint">'+esc(state.kpSel)+" · 共 "+list.length+" 题 · 思维段分布："+(dist||"—")+"</div>"
+ +list.map(function(m){return '<div class="item"><div class="meta">'+esc(m.createdAt)+'<span class="badge b-p">'+esc(m.attrib.stage)+"</span></div>"
+  +'<div class="sentence">'+esc(m.attrib.sentence)+"</div>"
+  +'<div class="hint">缺的思维动作：'+esc(m.attrib.missing)+"</div>"
+  +(m.photos[0]?'<img src="'+m.photos[0]+'" alt="错题图">':"")+"</div>"}).join("")
+ +'<button class="btn pri" onclick="printKp()">打印本知识点专项错题卡</button></div>';
+}
+function selKp(k){state.kpSel=k;render()}
 function viewBoard(){
  var added=M.filter(function(m){return daysBetween(m.createdAt,today())<=7}).length;
  var closed=attributed().filter(function(m){return m.review&&m.review.stageIdx>=3}).length;
@@ -373,7 +404,7 @@ function viewBoard(){
  var partial=M.filter(function(m){return m.scoreType==="部分得分"}).length;
  var pct=M.length?Math.round(partial/M.length*100):0;
  var matrix={};var tags={};
- attributed().forEach(function(m){if(!m.attrib)return;m.tags.forEach(function(t){tags[t]=1;var k=t+"|"+m.attrib.stage;matrix[k]=(matrix[k]||0)+1})});
+ attributed().forEach(function(m){if(!m.attrib)return;var t=kpOf(m);tags[t]=1;var k=t+"|"+m.attrib.stage;matrix[k]=(matrix[k]||0)+1});
  var tagList=Object.keys(tags);var out="";
  if(tagList.length){
   out='<table><tr><th>知识点 \\ 思维段</th>'+STAGES.map(function(s){return "<th>"+s+"</th>"}).join("")+"</tr>"
