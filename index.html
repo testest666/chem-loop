@@ -81,6 +81,7 @@ footer{max-width:960px;margin:0 auto;padding:12px;color:var(--sub);font-size:11p
       <button id="vStu" class="on" onclick="setView('student')">学生</button>
       <button id="vPar" onclick="setView('parent')">家长</button>
     </div>
+    <button class="btn sm ghost" onclick="setTab('ai')">AI 设置</button>
     <button class="btn sm ghost" onclick="exportJSON()">导出备份</button>
     <button class="btn sm ghost" onclick="document.getElementById('importFile').click()">导入</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this.files[0])">
@@ -88,7 +89,7 @@ footer{max-width:960px;margin:0 auto;padding:12px;color:var(--sub);font-size:11p
 </header>
 <nav><div class="tabs" id="tabs"></div></nav>
 <main id="app"></main>
-<footer>数据存在本机浏览器（IndexedDB），清缓存/换设备前请先导出 JSON 备份。MVP 的"AI 预填"为本地卡点建议库；看图识别错解需接入联网 AI，属升级项。</footer>
+<footer>数据存在本机浏览器（IndexedDB），清缓存/换设备前请先导出 JSON 备份。AI 校对需在「AI 设置」配置接口（照片将发往所选服务商，Key 只存本机）；未配置时用本地建议库。</footer>
 <div class="toast" id="toast"></div>
 <script>
 "use strict";
@@ -151,6 +152,7 @@ function render(){
  else if(state.tab==="warn")a.innerHTML=viewWarn();
  else if(state.tab==="printP")a.innerHTML=viewPrint(true);
  else if(state.tab==="check")a.innerHTML=viewCheck();
+ else if(state.tab==="ai")a.innerHTML=viewAI();
 }
 
 function tagChips(sel){
@@ -210,7 +212,7 @@ function viewAttrList(){
   +'<button class="btn ghost sm" onclick="delItem('+m.id+')">删除</button></div>'}).join("")+"</div>";
 }
 function delItem(id){if(!confirm("确认删除这道题？"))return;DB.del(id).then(function(){M=M.filter(function(m){return m.id!==id});render();toast("已删除")})}
-function openAttr(id){state.cur=M.filter(function(m){return m.id===id})[0];state.prefillSnap=null;render()}
+function openAttr(id){state.cur=M.filter(function(m){return m.id===id})[0];state.prefillSnap=null;state.aiResult=null;state.aiDecision=null;state.aiRebuttal="";render()}
 
 function viewAttrForm(){
  var m=state.cur;
@@ -234,6 +236,8 @@ function viewAttrForm(){
  +'<div class="sentence" id="sentBox">归因句式（自动拼装）：我在第 <b>?</b> 步卡住，属于 <b>?</b>，因为 <b>?</b></div>'
  +'<label>5 · 正确解法（自己写，必填）</label>'
  +'<textarea id="solution" placeholder="按标准步骤写，写清每步依据">'+(m.attrib?esc(m.attrib.solution):"")+"</textarea>"
+ +'<div class="chips" style="margin-top:10px"><button class="btn" onclick="aiDiagnose()">AI 校对（看图检查我的归因）</button><span class="hint" style="margin:6px">先自己写，AI 再看图对照——需先在「AI 设置」配置接口</span></div>'
+ +'<div id="aiBox"></div>'
  +'<button class="btn pri" onclick="confirmAttr()">确认归因（必须改过预填）</button> '
  +'<button class="btn ghost" onclick="state.cur=null;render()">稍后再做</button>'
  +"</div>";
@@ -265,9 +269,11 @@ function confirmAttr(){
  var s=document.querySelector("#stageChips .chip.on");var stage=s?s.textContent:STAGES[0];
  var kpChip=document.querySelector("#kpChips .chip.on");
  var kpVal=$("#kpCustom").value.trim()||(kpChip?kpChip.textContent:"")||m.tags[0]||"未分类";
+ if(state.aiResult&&!state.aiDecision){toast("AI 已给出参考意见——请先选「按 AI 修正」或「坚持我的」");return}
  m.attrib={doneTo:$("#doneTo").value,stuckAt:$("#stuckAt").value,stage:stage,kp:kpVal,missing:missing,
   sentence:"我在第 "+($("#stuckAt").value||"?")+" 步卡住（独立完成到第 "+($("#doneTo").value||"?")+" 步），属于"+stage+"，因为"+missing,
-  solution:sol};
+  solution:sol,rebuttal:state.aiRebuttal||"",
+  aiReview:state.aiResult?{checked:true,decision:state.aiDecision,agree:!!state.aiResult.agree,ts:today()}:{checked:false}};
  m.status="attributed";
  m.review.stageIdx=0;m.review.next=addDays(1);
  save(m).then(function(){state.cur=null;state.prefillSnap=null;render();toast("归因完成，明天进入复习队列")});
@@ -372,6 +378,7 @@ function printWeekly(){
  $("#printArea").innerHTML='<div class="pcard"><div class="side">化学错题闭环 · 周报　'+wk+"（"+today()+"）</div>"
  +'<table><tr><th>本周新增</th><th>已闭环</th><th>待归因积压</th><th>部分得分题</th></tr><tr><td>'+added+"</td><td>"+closed+'</td><td class="'+(late>0?"no":"ok")+'">'+late+"</td><td>"+partial+"</td></tr></table>"
  +'<h3>薄弱点 Top3（知识点 × 思维段）</h3>'+(top.length?"<ol>"+top.map(function(k){return "<li>"+esc(k)+"（"+matrix[k]+" 次）</li>"}).join("")+"</ol>":"（数据不足，先跑两周）")
+ +'<div class="hint">归因校对：'+aiStatLine()+"</div>"
  +'<div class="red">家长叮嘱（按方向说，不说"下次细心"）：本周重点练 ______</div>'
  +'<div class="back"><b>本周抽查记录</b>：□ 已抽 3 题重做　结果：______</div></div>';
  window.print();
@@ -417,6 +424,7 @@ function viewBoard(){
  +'<div class="stat"><div class="n '+(late?"no":"ok")+'">'+late+'</div><div class="l">待归因积压</div></div>'
  +'<div class="stat"><div class="n">'+pct+'%</div><div class="l">部分得分题占比</div></div></div>'
  +'<div class="hint">"部分得分题占比"下降 = 提分最直接的信号。积压 &gt;2 天请到"预警"页处理。</div>'
+ +'<h3>归因校对（AI 检查孩子归因的准确性）</h3><div class="hint">'+aiStatLine()+"　·　驳回多 = 孩子敢坚持自己的判断（好事）；修正多 = 归因准确性在提高的路上。</div>"
  +'<h3>知识点 × 思维段矩阵</h3>'+out+"</div>";
 }
 function viewWarn(){
@@ -453,8 +461,85 @@ function checkOne(id,ok){
  save(m).then(function(){render();toast(ok?"已记录：重做正确":"已记录：重做错误，题已回流到归因列表")});
 }
 
+function aiCfg(){try{return JSON.parse(localStorage.getItem("chem-ai-cfg"))||{}}catch(e){return{}}}
+function saveAI(){
+ localStorage.setItem("chem-ai-cfg",JSON.stringify({endpoint:$("#aiEp").value.trim(),model:$("#aiModel").value.trim(),key:$("#aiKey").value.trim()}));
+ toast("已保存到本机浏览器（Key 不会进入代码仓库）");
+}
+function viewAI(){
+ var c=aiCfg();
+ return '<div class="card"><h2>AI 归因校对设置</h2>'
+ +'<div class="alert a">隐私与费用提示：开启后，错题照片和孩子的解答会发给你配置的大模型服务商（按其标准计费）。拍照请避开姓名、班级。API Key 只保存在本机浏览器，不会进入代码仓库。</div>'
+ +'<label>接口地址（OpenAI 兼容格式，以服务商文档为准）</label>'
+ +'<input type="text" id="aiEp" value="'+esc(c.endpoint||"")+'" placeholder="例：https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions">'
+ +'<label>模型名（须支持图片理解）</label><input type="text" id="aiModel" value="'+esc(c.model||"")+'" placeholder="例：qwen-vl-plus（以服务商文档为准）">'
+ +'<label>API Key</label><input type="text" id="aiKey" value="'+esc(c.key||"")+'" placeholder="sk-...">'
+ +'<button class="btn pri" onclick="saveAI()">保存到本机</button>'
+ +'<div class="hint">说明：若调用时报跨域（CORS）错误，是服务商不允许浏览器直连——回来告诉我，我加一个本地代理。未配置时，归因页仍可用本地建议库预填。</div></div>';
+}
+function aiStatLine(){
+ var c={一致:0,修正:0,驳回:0,未校对:0};
+ attributed().forEach(function(m){var r=m.attrib&&m.attrib.aiReview;
+  if(!r||!r.checked)c.未校对++;
+  else if(r.decision==="驳回")c.驳回++;
+  else if(r.decision==="修正")c.修正++;
+  else c.一致++;});
+ return "一致 "+c.一致+" · 修正 "+c.修正+" · 驳回 "+c.驳回+" · 未校对 "+c.未校对;
+}
+function aiDiagnose(){
+ var cfg=aiCfg();
+ if(!cfg.key||!cfg.endpoint){toast("先点右上角「AI 设置」配置接口和 Key");return}
+ var m=state.cur;
+ var missing=$("#missing").value.trim();
+ if(!missing){toast("先自己写「缺的思维动作」——AI 校对的是你写的归因，不是替你写");return}
+ var s=document.querySelector("#stageChips .chip.on");var stage=s?s.textContent:"";
+ var kpChip=document.querySelector("#kpChips .chip.on");var kp=kpChip?kpChip.textContent:"";
+ $("#aiBox").innerHTML='<div class="alert a">AI 正在看图诊断…</div>';
+ var userContent=[{type:"text",text:"【学生自评归因】错因知识点："+(kp||"未填")+"；思维段："+(stage||"未填")+"；卡在第 "+($("#stuckAt").value||"?")+" 步（独立完成到第 "+($("#doneTo").value||"?")+" 步）；缺的思维动作："+missing+"。\n【题目标签】"+(m.tags.join("、")||"无")+"\n请对照照片中的题目与学生错解，校对其自评归因是否准确，并给出你的参考定位。"}];
+ (m.photos||[]).forEach(function(p){userContent.push({type:"image_url",image_url:{url:p}})});
+ fetch(cfg.endpoint,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+cfg.key},
+  body:JSON.stringify({model:cfg.model,temperature:0.2,messages:[
+   {role:"system",content:"你是人教版高二化学（化学反应原理/物质结构与性质/有机化学基础）错题诊断专家。学生给出自评归因，你对照题目照片和学生错解，判断其归因是否准确并给出参考定位。只输出一个 JSON 对象，不要任何其他文字。格式：{\"kp\":\"错因知识点\",\"stage\":\"看不出|想不到|推不动|写不好\",\"stuckAt\":\"卡住的步骤描述\",\"missing\":\"缺的思维动作（一句话，具体到本题）\",\"agree\":true或false,\"comment\":\"给学生的一句话点评\"}"},
+   {role:"user",content:userContent}]})
+ }).then(function(r){return r.json().then(function(d){if(!r.ok)throw new Error(d.error&&d.error.message||("HTTP "+r.status));return d})})
+ .then(function(d){
+  var txt=d.choices[0].message.content||"";
+  var obj=JSON.parse(txt.trim().replace(/^```json?/,"").replace(/```$/,"").trim());
+  state.aiResult=obj;state.aiDecision=null;state.aiRebuttal="";renderAICard();
+ }).catch(function(e){$("#aiBox").innerHTML='<div class="alert red">AI 调用失败：'+esc(e.message||e)+"。可能是接口/Key 不对、网络不通，或服务商不允许浏览器直连（CORS）——回来告诉我，我加本地代理。</div>"});
+}
+function renderAICard(){
+ var a=state.aiResult;if(!a||!$("#aiBox"))return;
+ var agree=a.agree?'<span class="badge b-g">AI 认同你的归因</span>':'<span class="badge b-a">AI 有不同意见</span>';
+ var dec=state.aiDecision?'<span class="badge b-p">你的处理：'+esc(state.aiDecision)+"</span>":"";
+ $("#aiBox").innerHTML='<div class="alert '+(a.agree?"g":"a")+'"><b>AI 参考定位</b>'+agree+dec+'<br>错因知识点：<b>'+esc(a.kp)+"</b>　思维段：<b>"+esc(a.stage)+"</b>　卡点：<b>"+esc(a.stuckAt)+"</b><br>缺的思维动作："+esc(a.missing)+"<br>点评："+esc(a.comment)+"</div>"
+ +'<div class="chips"><button class="btn pri sm" onclick="useAI()">按 AI 修正我的归因</button>'
+ +'<button class="btn ghost sm" onclick="keepMine()">坚持我的'+(a.agree?"（AI 认同）":"（写一句理由）")+"</button></div>"
+ +'<div id="rebutBox"></div>';
+}
+function useAI(){
+ var a=state.aiResult;if(!a)return;
+ $("#missing").value=a.missing||"";
+ if(a.stuckAt&&/^\d+$/.test(String(a.stuckAt)))$("#stuckAt").value=a.stuckAt;
+ [].forEach.call(document.querySelectorAll("#stageChips .chip"),function(c){c.className="chip"+(c.textContent===a.stage?" on":"")});
+ [].forEach.call(document.querySelectorAll("#kpChips .chip"),function(c){c.className="chip"+(c.textContent===a.kp?" on":"")});
+ state.aiDecision="修正";state.aiRebuttal="";
+ updateSent();renderAICard();
+ toast("已按 AI 修正——请自己再读一遍，这是你的归因");
+}
+function keepMine(){
+ if(state.aiResult&&state.aiResult.agree){state.aiDecision="一致";state.aiRebuttal="";renderAICard();toast("已维持你的归因（AI 认同）");return}
+ $("#rebutBox").innerHTML='<label>坚持我的归因，请写一句理由（必填）</label><textarea id="rebuttal" placeholder="例：AI 没看到我第二步已经用了守恒，我是算错不是没想到"></textarea><button class="btn pri sm" onclick="confirmKeep()">提交理由</button>';
+}
+function confirmKeep(){
+ var t=$("#rebuttal").value.trim();
+ if(!t){toast("请写一句理由——能驳倒 AI 的理由才是真想明白了");return}
+ state.aiDecision="驳回";state.aiRebuttal=t;renderAICard();
+ toast("已记录你的理由，会随归因保存");
+}
+
 function exportJSON(){
- var data={app:"chem-loop",version:"3.1",exported:today(),tags:TAGS,recent:state.recent,mistakes:M};
+ var data={app:"chem-loop",version:"3.3",exported:today(),tags:TAGS,recent:state.recent,mistakes:M};
  var blob=new Blob([JSON.stringify(data)],{type:"application/json"});
  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="化学错题备份-"+today()+".json";a.click();
  toast("已导出，请妥善保存（建议手机电脑各存一份）");
